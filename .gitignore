@@ -1,0 +1,23 @@
+# ─── Session & Local State ────────────────────────────────────────────────────
+now_playing.json
+music_listener_state.json
+playlist_status.md
+WORKFLOW_MUSIC_TOGETHER_LOCAL.md
+
+# ─── Workflow Folders (per-session, local only) ───────────────────────────────
+workflow_*/
+workflow_*-unraid/
+workflow_*-titan/
+
+# ─── OS / Editor Noise ─────────────────────────────────────────────────────────
+.DS_Store
+*.swp
+*.swo
+*~
+Thumbs.db
+
+# ─── Secrets ──────────────────────────────────────────────────────────────────
+*.pem
+*.key
+.env
+.env.*

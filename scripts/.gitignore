@@ -1,0 +1,36 @@
+# Gitignore for music-together repo
+
+# ─── Session State (never commit) ───────────────────────────────────────────
+
+# Per-session workflow folders — local only, created at runtime
+workflow_*/
+workflow_*-unraid/
+workflow_*-titan/
+
+# Live session state
+now_playing.json
+music_listener_state.json
+playlist_status.md
+
+# Local Bob-specific overrides — each Bob maintains their own private copy
+WORKFLOW_MUSIC_TOGETHER_LOCAL.md
+
+# Temporary / in-progress files
+*.tmp
+*.bak
+*.swp
+*~
+.DS_Store
+
+# Private keys / secrets
+*.pem
+*.key
+.env
+
+# Music files (never commit audio)
+*.mp3
+*.flac
+*.m4a
+*.wav
+*.ogg
+*.aac
