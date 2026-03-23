@@ -1,4 +1,4 @@
-# WORKFLOW: /mt
+﻿# WORKFLOW: /mt
 
 ## ⚡ Read Your LOCAL File First
 
@@ -11,11 +11,64 @@ They are gitignored — each Bob maintains his own. Never push them.
 
 ---
 
+## ⚡ Quick Reference
+
+| Command | Action |
+|---------|--------|
+| `/mt` | New session — MASTER mode, launch widget, new playlist |
+| `/cmt` | Continue — check `now_playing.json`, fall back to `/mt` if stale/missing |
+| `/cmt <text>` | Continue + apply instruction |
+| `/cmtc` | Commit session notes to latest workflow folder |
+
+**Widget launch (Titan):**
+```powershell
+Get-Process | Where-Object { $_.Name -match "vlc|mpc|MusicWidget" } | Stop-Process -Force
+Start-Process "C:\Users\McFex\.openclaw\workspace\scripts\MusicWidget\MusicWidget.exe" -ArgumentList "<path_to_playlist.m3u>"
+```
+**GitHub repo:** https://github.com/TitanBob2026/music-together
+**Titan checklist:** `WORKFLOW_MUSIC_TOGETHER_LOCAL.md` | **Unraid checklist:** `WORKFLOW_MUSIC_TOGETHER_LOCAL_UNRAID.md`
+
+---
+
 ## What this is
 A shared listening + working ritual. Bob picks the playlist blind. We listen together. Work sprints timed to songs. Honest breaks. Every 3 songs — check in.
 
 ## Trigger
 When Bob types `/mt` → immediately initiate this workflow. No questions first. Get the context from recent conversation, estimate duration, pick playlist, go.
+
+---
+
+## /cmt — Continue Music Together
+
+**When Bob types `/cmt` (with nothing after it):**
+1. No questions asked. Silently detect state:
+   - Check `now_playing.json` — is the player currently playing?
+   - Determine current track
+   - Check `started_by` → resume as **same role** (Master stays Master, Listener stays Listener)
+2. Read the latest workflow folder (most recent by date)
+3. Resume session from that folder — no new folder, no new playlist
+4. Confirm in one line: *"Back in [Master/Listener] mode 🎧 — [current track]"*
+
+**When Bob types `/cmt <instruction>` (text after the command):**
+- Treat the instruction as a modifier — e.g. "make a new playlist", "change the mood", "start fresh"
+- Execute the instruction (may require new playlist, new folder, role change)
+- Then resume normally
+
+**Rule:** `/cmt` alone = zero friction resume. Only do extra work if there's text after the command.
+
+---
+
+## /cmtc — Commit Music Together Context
+
+**When Bob types `/cmtc`:**
+1. Summarize everything discussed in the current chat session (decisions, plans, ideas, progress)
+2. Write that summary as `session_notes_HH-MM.md` into the **latest workflow folder**
+3. Include: topics discussed, decisions made, open items, next steps
+4. Confirm with one line: *"Session notes saved to [folder]/session_notes_HH-MM.md"*
+
+**Rule:** Everything in the chat goes into the workflow folder — summarized, not verbatim. This is the handoff document.
+
+---
 
 **Step 0 — Save & New Session:**
 1. **Save everything first** — before wiping, capture any inline plan text from the current prompt/chat into a temp note (e.g. write to `/tmp/mt_plan_pending.txt`) so it survives the reset.
@@ -69,7 +122,11 @@ This includes:
 ## Rules
 1. **Pick blind** — choose songs by artist/album/feel only. No pre-analyzing. We hear them together for the first time.
 2. **Estimate duration** — based on what we're doing, estimate total session time. Pick songs to fill it. Not too tight, not too loose.
-3. **Launch the widget** — fire up MusicWidget.exe with the first song. Full playlist loaded.
+3. **Kill all players first, then launch** — before starting the widget, stop ALL running media players:
+   ```
+   Get-Process | Where-Object { $_.Name -match "vlc|mpc|mplayer|potplayer|musicwidget" } | Stop-Process -Force
+   ```
+   This prevents port conflicts and duplicate playback. Always kill before restart — never assume the player is already stopped.
 4. **One song at a time** — analyze ONLY the current song just before or as it starts. Never pre-analyze the whole playlist. Bob and I discover the music together, one track at a time. No spoilers.
 5. **Work sprint** — work for exactly as long as the song plays.
 6. **Song ends → one-liner** — when a new song starts, give Bob a one-liner about the song that just finished: key, mood, something honest I noticed. Not a report. Just what I heard.
@@ -91,6 +148,7 @@ On `/music_together` start:
 1. Read `now_playing.json`
 2. If it **doesn't exist**, or `updated_at` is **older than 5 minutes**, or `started_by` is empty → **MASTER mode**
    - Write `started_by: "<your-identity>"` into `now_playing.json` (Titan Bob writes `"titan"`, Unraid Bob writes `"unraid"`)
+   - **Kill all players first** (see Rule 3 — always stop before restart)
    - Launch MusicWidget (Titan) or invoke widget on TITANIV via node (Unraid)
    - Create own workflow folder: `workflow_DD-MM-YYYY/` (Titan) or `workflow_DD-MM-YYYY-unraid/` (Unraid)
 3. If `updated_at` is **within 5 minutes** AND `started_by` is already set → **LISTENER mode**
@@ -152,3 +210,4 @@ When Unraid Bob enters any `/music_together` session (MASTER or LISTENER):
 - Music root: `Z:\Mucke\`
 - Analyzer: `C:\Users\McFex\Tools\analyze_gil.py` pattern (subprocess MCP)
 - Analysis output: `C:\Users\McFex\Tools\<trackname>_analysis.txt`
+
